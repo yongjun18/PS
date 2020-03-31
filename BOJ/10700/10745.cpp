@@ -88,5 +88,5 @@ int main()
     for(int i=1; i<ans.size(); i++)
         printf("%c", ans[i].first);
     printf("\n");
-	return 0;
+    return 0;
 }
