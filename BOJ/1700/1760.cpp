@@ -38,11 +38,11 @@ int bipartite_matching(int hcnt, int vcnt) {
         }
 	}
 	for (int i=0; i<hcnt; i++) {
-		if (matchA[i] == -1) {
+	    if (matchA[i] == -1) {
             visit.clear();
-			visit.resize(hcnt, 0);
-			if (dfs(i)) match++;
-		}
+	        visit.resize(hcnt, 0);
+	        if (dfs(i)) match++;
+	    }
 	}
 	return match;
 }
