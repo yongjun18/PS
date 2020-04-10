@@ -14,37 +14,36 @@ vector< vector<int> > adj;
 vector<int> visit;
 
 int dfs(int a) {
-	visit[a] = 1;
-	for (int b : adj[a]) {
-		if (matchB[b] == -1 || (!visit[matchB[b]] && dfs(matchB[b]))) {
-			matchA[a] = b;
-			matchB[b] = a;
-			return 1;
-		}
-	}
-	return 0;
+    visit[a] = 1;
+    for (int b : adj[a]) {
+        if (matchB[b] == -1 || (!visit[matchB[b]] && dfs(matchB[b]))) {
+            matchA[a] = b;
+            matchB[b] = a;
+            return 1;
+        }
+    }
+    return 0;
 }
 int bipartite_matching(int hcnt, int vcnt) {
-	int match = 0;
-	matchA.resize(hcnt, -1);
-	matchB.resize(vcnt, -1);
-	adj.resize(hcnt, vector<int>());
+    int match = 0;
+    matchA.resize(hcnt, -1);
+    matchB.resize(vcnt, -1);
+    adj.resize(hcnt, vector<int>());
 
-	for(int i=0; i<n; i++){
+    for(int i=0; i<n; i++){
         for(int j=0; j<m; j++){
-            if(arr[i][j] == 0){
+            if(arr[i][j] == 0)
                 adj[hnum[i][j]].push_back(vnum[i][j]);
-            }
         }
-	}
-	for (int i=0; i<hcnt; i++) {
-	    if (matchA[i] == -1) {
+    }
+    for (int i=0; i<hcnt; i++) {
+        if (matchA[i] == -1) {
             visit.clear();
-	        visit.resize(hcnt, 0);
-	        if (dfs(i)) match++;
-	    }
-	}
-	return match;
+            visit.resize(hcnt, 0);
+            if (dfs(i)) match++;
+        }
+    }
+    return match;
 }
 
 int main()
