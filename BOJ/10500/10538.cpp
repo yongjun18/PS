@@ -24,7 +24,6 @@ void trie_insert(const string key, int num){
 void build_fail(){
     root->fail = root;
     queue<Trie*> q;
-
     for(int i=0; i<26; i++){
         Trie* nxt = root->go[i];
         if(nxt != NULL){
@@ -41,6 +40,7 @@ void build_fail(){
                 while(dest != root && dest->go[i] == NULL)
                     dest = dest->fail;
                 if(dest->go[i]) dest = dest->go[i];
+
                 nxt->fail = dest;
                 q.push(nxt);
             }
@@ -48,79 +48,90 @@ void build_fail(){
     }
 }
 
-char arr1[2020][2020];
-char arr2[2020][2020];
-int code1[2020];
-int cfail[2020];
-int code2[2020][2020];
-vector<string> str1;
+char small[2005][2005];
+char big[2005][2005];
+vector<string> smlstr;
 
-void get_cfail(int n1){
-    int match = 0;
-    for(int last=1; last<n1; last++){
-        while(match > 0 && code1[last] != code1[match])
-            match = cfail[match-1];
-        if(code1[last] == code1[match]) match++;
-        cfail[last] = match;
-    }
-}
+int bignum[2005][2005];
+int smlnum[2005];
+int sfail[2005];
 
-
-int main()
-{
-    int n1, m1, n2, m2;
-    scanf("%d %d %d %d", &n1, &m1, &n2, &m2);
-    for(int i=0; i<n1; i++)
-        scanf("%s", arr1[i]);
-    for(int i=0; i<n2; i++)
-        scanf("%s", arr2[i]);
-
-    for(int i=0; i<n1; i++)
-        str1.push_back(arr1[i]);
-    sort(str1.begin(), str1.end());
-    str1.erase(unique(str1.begin(), str1.end()), str1.end());
+void build_smlstr(int h1){
+    for(int i=0; i<h1; i++)
+        smlstr.push_back(string(small[i]));
+    sort(smlstr.begin(), smlstr.end());
+    smlstr.erase(unique(smlstr.begin(), smlstr.end()), smlstr.end());
 
     root = new Trie();
-    for(int i=0; i<str1.size(); i++)
-        trie_insert(str1[i], i);
+    for(int i=0; i<smlstr.size(); i++)
+        trie_insert(smlstr[i], i);
     build_fail();
+}
+void build_bignum(int h2, int w2){
+    for(int i=0; i<h2; i++){
+        Trie* now = root;
+        for(int j=0; j<w2; j++){
+            int nxt = big[i][j] - 'a';
+            while(now != root && now->go[nxt] == NULL)
+                now = now->fail;
+            if(now->go[nxt])
+                now = now->go[nxt];
 
-    for(int i=0; i<n1; i++){
-        Trie* now = root;
-        for(int j=0; j<m1; j++){
-            int c = arr1[i][j] - 'a';
-            while(now != root && now->go[c] == NULL)
-                now = now->fail;
-            if(now->go[c])
-                now = now->go[c];
-        }
-        code1[i] = now->finish;
-    }
-    for(int i=0; i<n2; i++){
-        Trie* now = root;
-        for(int j=0; j<m2; j++){
-            int c = arr2[i][j] - 'a';
-            while(now != root && now->go[c] == NULL)
-                now = now->fail;
-            if(now->go[c])
-                now = now->go[c];
-            code2[i][j] = now->finish;
+            bignum[i][j] = now->finish;
         }
     }
-    get_cfail(n1);
+}
+void build_smlnum(int h1, int w1){
+    for(int i=0; i<h1; i++){
+        Trie* now = root;
+        for(int j=0; j<w1; j++){
+            int nxt = small[i][j] - 'a';
+            while(now != root && now->go[nxt] == NULL)
+                now = now->fail;
+            if(now->go[nxt])
+                now = now->go[nxt];
+        }
+        smlnum[i] = now->finish;
+    }
+}
+void build_sfail(int h1){
+    int match = 0;
+    for(int last=1; last<h1; last++){
+        while(match > 0 && smlnum[last] != smlnum[match])
+            match = sfail[match-1];
+        if(smlnum[last] == smlnum[match]) match++;
+        sfail[last] = match;
+    }
+}
+int get_ans(int h1, int w1, int h2, int w2){
     int ans = 0;
-    for(int j=0; j<m2; j++){
+    for(int j=0; j<w2; j++){
         int match = 0;
-        for(int last=0; last<n2; last++){
-            while(match > 0 && code2[last][j] != code1[match])
-                match = cfail[match-1];
-            if(code2[last][j] == code1[match]) match++;
-            if(match == n1){
+        for(int i=0; i<h2; i++){
+            while(match > 0 && bignum[i][j] != smlnum[match])
+                match = sfail[match-1];
+            if(bignum[i][j] == smlnum[match]) match++;
+            if(match == h1){
                 ans++;
-                match = cfail[match-1];
+                match = sfail[match-1];
             }
         }
     }
-    printf("%d\n", ans);
+    return ans;
+}
+int main()
+{
+    int h1, w1, h2, w2;
+    scanf("%d %d %d %d", &h1, &w1, &h2, &w2);
+    for(int i=0; i<h1; i++)
+        scanf("%s", small[i]);
+    for(int i=0; i<h2; i++)
+        scanf("%s", big[i]);
+
+    build_smlstr(h1);
+    build_bignum(h2, w2);
+    build_smlnum(h1, w1);
+    build_sfail(h1);
+    printf("%d\n", get_ans(h1, w1, h2, w2));
     return 0;
 }
