@@ -21,7 +21,7 @@ struct DisjointSet {
         if (size[u] < size[v]) swap(u, v);
 
         parent[v] = u;
-        size[u] += size[v];    
+        size[u] += size[v];
     }
 };
 
@@ -47,7 +47,7 @@ void kruskal(int n) {
         mst.push_back(now);
     }
 }
-int adj[1030][1030];
+vector<int> adj[1030];
 
 int main()
 {
@@ -62,15 +62,13 @@ int main()
     }
     kruskal(n+1);
     for(auto it : mst){
-        adj[it.u][it.v] = 1;
-        adj[it.v][it.u] = 1;
+        adj[it.u].push_back(it.v);
+        adj[it.v].push_back(it.u);
     }
     for(int i=1; i<=n; i++){
-        int sum = 0;
-        for(int j=1; j<=n; j++) sum += adj[i][j];
-        printf("%d ", sum);
-        for(int j=1; j<=n; j++) if(adj[i][j])
-            printf("%d ", j);
+        sort(adj[i].begin(), adj[i].end());
+        printf("%d ", adj[i].size());
+        for(int nxt : adj[i]) printf("%d ", nxt);
         printf("\n");
     }
     return 0;
