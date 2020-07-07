@@ -83,16 +83,16 @@ int main()
         scanf("%s", arr[i]);
 
     int number = 0;
-    int floor = 0;
+    int area = 0;
     for(int i=0; i<n; i++){
         for(int j=0; j<m; j++){
-            if(arr[i][j] == '.') floor++;
+            if(arr[i][j] == '.') area++;
             num[i][j] = number++;
         }
     }
     connect();
 
     int flow = Hopcroft_Karp(n*m, n*m);
-    printf("%d\n", floor-flow);
+    printf("%d\n", area-flow);
     return 0;
 }
