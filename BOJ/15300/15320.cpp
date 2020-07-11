@@ -5,54 +5,61 @@ const int INF = 1e9;
 const int MOD = 1e9+7;
 
 int n, k, x;
-vector<int> adj[5010];
-vector<int> cost[5010];
+struct Edge{ int to, w; };
+vector<Edge> adj[5010];
+
 int siz[5010];
-int dp[5010][110][110];
+int dp[5010][105][105];
+
+int g(int gnum){ return min(gnum, x); }
+int c(int cnt){ return min(cnt, k); }
+void upd(int &to, int val){ to = min(to, val); }
 
 void dfs(int now){
-    for(int nxt : adj[now])
-        dfs(nxt);
-
     siz[now] = 1;
-    for(int nxt : adj[now])
-        siz[now] += siz[nxt];
+    for(Edge it : adj[now]){
+        dfs(it.to);
+        siz[now] += siz[it.to];
+    }
 
     if(adj[now].size() == 0)
-        dp[now][1][0] = 0;
-    else if(adj[now].size() == 1){
-        int s = adj[now][0];
-        int scost = cost[now][0];
-        for(int cons=1; cons<=k; cons++){
-            for(int cut=0; cut<=(siz[s]-1)/k; cut++){
-                dp[now][min(cons+1, k)][cut] =
-                    min(dp[now][min(cons+1, k)][cut], dp[s][cons][cut]);
-                if(cons == k)
-                    dp[now][1][cut+1] =
-                        min(dp[now][1][cut+1], dp[s][cons][cut] + scost);
+        dp[now][0][1] = 0;
+
+    if(adj[now].size() == 1){
+        int l = adj[now][0].to;
+        int lw = adj[now][0].w;
+        for(int lgnum=0; lgnum<=g(siz[l]/k); lgnum++){
+            for(int lcnt=0; lcnt<=k; lcnt++){
+                int lpain = dp[l][lgnum][lcnt];
+                if(lpain >= INF) continue;
+
+                upd(dp[now][lgnum][c(lcnt+1)], lpain);
+                if(lcnt >= k)
+                    upd(dp[now][g(lgnum+1)][1], lpain + lw);
             }
         }
     }
-    else{
-        int l = adj[now][0];
-        int r = adj[now][1];
-        int lcost = cost[now][0];
-        int rcost = cost[now][1];
-        for(int lcon=1; lcon<=k; lcon++){
-            for(int lcut=0; lcut<=(siz[l]-1)/k; lcut++){
-                for(int rcon=1; rcon<=k; rcon++){
-                    for(int rcut=0; rcut<=(siz[r]-1)/k; rcut++){
-                        dp[now][min(k, lcon+rcon+1)][lcut+rcut] =
-                            min(dp[now][min(k, lcon+rcon+1)][lcut+rcut], dp[l][lcon][lcut] + dp[r][rcon][rcut]);
-                        if(lcon == k)
-                            dp[now][min(k, rcon+1)][lcut+rcut+1] =
-                                min(dp[now][min(k, rcon+1)][lcut+rcut+1], dp[l][lcon][lcut] + dp[r][rcon][rcut] + lcost);
-                        if(rcon == k)
-                            dp[now][min(k, lcon+1)][lcut+rcut+1] =
-                                min(dp[now][min(k, lcon+1)][lcut+rcut+1], dp[l][lcon][lcut] + dp[r][rcon][rcut] + rcost);
-                        if(lcon == k && rcon == k)
-                            dp[now][1][lcut+rcut+2] =
-                                min(dp[now][1][lcut+rcut+2], dp[l][lcon][lcut] + dp[r][rcon][rcut] + lcost + rcost);
+
+    if(adj[now].size() == 2){
+        int l = adj[now][0].to;
+        int lw = adj[now][0].w;
+        int r = adj[now][1].to;
+        int rw = adj[now][1].w;
+        for(int lgnum=0; lgnum<=g(siz[l]/k); lgnum++){
+            for(int lcnt=0; lcnt<=k; lcnt++){
+                for(int rgnum=0; rgnum<=g(siz[r]/k); rgnum++){
+                    for(int rcnt=0; rcnt<=k; rcnt++){
+                        int lpain = dp[l][lgnum][lcnt];
+                        int rpain = dp[r][rgnum][rcnt];
+                        if(lpain >= INF || rpain >= INF) continue;
+
+                        upd(dp[now][g(lgnum+rgnum)][c(lcnt+rcnt+1)], lpain+rpain);
+                        if(lcnt >= k)
+                            upd(dp[now][g(lgnum+rgnum+1)][c(rcnt+1)], lpain+rpain+lw);
+                        if(rcnt >= k)
+                            upd(dp[now][g(lgnum+rgnum+1)][c(lcnt+1)], lpain+rpain+rw);
+                        if(lcnt >= k && rcnt >= k)
+                            upd(dp[now][g(lgnum+rgnum+2)][1], lpain+rpain+rw+lw);
                     }
                 }
             }
@@ -62,21 +69,26 @@ void dfs(int now){
 
 int main()
 {
-    for(int i=0; i<5010; i++){
-        for(int j=0; j<110; j++){
-            for(int l=0; l<110; l++)
+    int ans;
+    scanf("%d %d %d", &n, &k, &x);
+    for(int i=2; i<=n; i++){
+        int p, w;
+        scanf("%d %d", &p, &w);
+        adj[p].push_back({i, w});
+    }
+    for(int i=1; i<=n; i++){
+        for(int j=0; j<=x; j++){
+            for(int l=0; l<=k; l++)
                 dp[i][j][l] = INF;
         }
     }
-    scanf("%d %d %d", &n, &k, &x);
-    for(int i=2; i<=n; i++){
-        int p, c;
-        scanf("%d %d", &p, &c);
-        adj[p].push_back(i);
-        cost[p].push_back(c);
-    }
     dfs(1);
-    if(dp[1][k][x-1] >= INF) printf("-1\n");
-    else printf("%d\n", dp[1][k][x-1]);
+
+    ans = dp[1][x-1][k];
+    for(int cnt=0; cnt<=k; cnt++)
+        upd(ans, dp[1][x][cnt]);
+
+    if(ans >= INF) printf("-1\n");
+    else printf("%d\n", ans);
     return 0;
 }
