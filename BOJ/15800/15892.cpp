@@ -4,15 +4,13 @@ typedef long long ll;
 const int INF = 1e9;
 const int MOD = 1e9+7;
 
-const int EDGE = 302;
-
 struct Edge {
     int from, to, capacity, flow;
     Edge* reverse;
 };
-vector<Edge*> adj[10500];
-int level[10500];
-int work[10500];
+vector<Edge*> adj[600];
+int level[600];
+int work[600];
 
 void add_edge(int u, int v, int capacity) {
     Edge* ef = new Edge();
@@ -69,17 +67,6 @@ int dinic(int source, int sink) {
     return total_flow;
 }
 
-int ecnt = 0;
-void connect(int u, int v, int c){
-    int edge1 = ecnt++;
-    int edge2 = ecnt++;
-    add_edge(u, EDGE+edge1, INF);
-    add_edge(v, EDGE+edge1, INF);
-    add_edge(EDGE+edge1, EDGE+edge2, c);
-    add_edge(EDGE+edge2, u, INF);
-    add_edge(EDGE+edge2, v, INF);
-}
-
 int main()
 {
     int n, m;
@@ -87,7 +74,8 @@ int main()
     while(m--){
         int a, b, c;
         scanf("%d %d %d", &a, &b, &c);
-        connect(a, b, c);
+        add_edge(a, b, c);
+        add_edge(b, a, c);
     }
     printf("%d\n", dinic(1, n));
     return 0;
