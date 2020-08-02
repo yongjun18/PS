@@ -72,26 +72,14 @@ ll dinic(int source, int sink) {
     }
     return total_flow;
 }
-void print_ans(int n, int k, int source){
+void print_ans(int n, int k, int source, int sink){
     int cnt = 0;
     vector<int> ans(n);
-    vector<int> visit(2010);
-    queue<int> que;
 
-    que.push(source);
-    visit[source] = 1;
-    while(que.size()){
-        int now = que.front(); que.pop();
-        for(Edge* e : adj[now]){
-            if(visit[e->to] == 0 && e->capacity-e->flow > 0){
-                que.push(e->to);
-                visit[e->to] = 1;
-            }
-        }
-    }
+    bfs(source, sink);
     for(int i=0; i<n; i++){
         for(int j=0; j<k; j++){
-            if(visit[i+IN+j*LAYER] == 1 && visit[i+OUT+j*LAYER] == 0){
+            if(level[i+IN+j*LAYER] >= 0 && level[i+OUT+j*LAYER] == -1){
                 cnt++;
                 ans[i] = 1;
                 break;
@@ -135,7 +123,6 @@ int main()
     flow = dinic(SOURCE, SINK);
 
     if(flow >= INF) printf("-1\n");
-    else if(flow == 0) printf("0\n");
-    else print_ans(n, k, SOURCE);
+    else print_ans(n, k, SOURCE, SINK);
     return 0;
 }
