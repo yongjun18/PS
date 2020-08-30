@@ -22,11 +22,11 @@ ll extended_gcd(ll a, ll b, ll &retx, ll &rety) {
 	return oldr;
 }
 
-// mod n 계에서 x에 대한 곱셈 역원 구하기
+// mod n 계에서 a에 대한 곱셈 역원 구하기
 // ax + ny = 1 을 만족하는 x, y 를 찾는다.
-ll modinv(ll x, ll n) {
+ll modinv(ll a, ll n) {
 	ll gcdv, s, t;
-	gcdv = extended_gcd(x, n, s, t);
+	gcdv = extended_gcd(a, n, s, t);
 	if (gcdv != 1) return -1;
 	if (s < 0) s = ((s % n) + n) % n;
 	return s;
