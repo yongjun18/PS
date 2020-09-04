@@ -46,7 +46,6 @@ void add_edge(int u, int v){
 	adj[v].push_back(u);
 }
 
-
 int dfs(int v) {
 	int size = 1;
 	int max_child_size = 0;
