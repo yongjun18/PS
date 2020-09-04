@@ -1,43 +1,51 @@
-const int INF = 1e9;
 const int MX = 1e5;
 
 ll tree[400000];
 ll lazy[400000];
 
 void propagate(int no, int nl, int nr) {
-	if (lazy[no] == 0) return;
-	if (nl + 1 != nr) {
-		lazy[2 * no] += lazy[no];
-		lazy[2 * no + 1] += lazy[no];
+	if(nl+1 != nr){
+		int mid = (nl+nr)/2;
+		tree[2*no] += lazy[no] * (mid-nl);
+		tree[2*no+1] += lazy[no] * (nr-mid);
+		lazy[2*no] += lazy[no];
+		lazy[2*no+1] += lazy[no];
 	}
-	tree[no] += lazy[no] * (nr - nl);
 	lazy[no] = 0;
 }
 ll seg_query(int l, int r, int no, int nl, int nr) {
-	propagate(no, nl, nr);
 	if (r <= nl || nr <= l) return 0;
 	if (l <= nl && nr <= r) return tree[no];
 
+	propagate(no, nl, nr);
 	int mid = (nl + nr) / 2;
 	return seg_query(l, r, 2 * no, nl, mid) + seg_query(l, r, 2 * no + 1, mid, nr);
 }
 ll seg_query(int l, int r, int n) { return seg_query(l, r, 1, 0, n); }
-ll seg_update(int l, int r, ll val, int no, int nl, int nr) {
-	propagate(no, nl, nr);
-	if (r <= nl || nr <= l) return tree[no];
+void seg_update(int l, int r, ll val, int no, int nl, int nr) {
+	if (r <= nl || nr <= l) return;
 	if (l <= nl && nr <= r) {
+		tree[no] += (nr-nl)*val;
 		lazy[no] += val;
-		propagate(no, nl, nr);
-		return tree[no];
+		return;
 	}
+	propagate(no, nl, nr);
 	int mid = (nl + nr) / 2;
-	return tree[no] = seg_update(l, r, val, 2 * no, nl, mid) + seg_update(l, r, val, 2 * no + 1, mid, nr);
+	seg_update(l, r, val, 2*no, nl, mid);
+	seg_update(l, r, val, 2*no+1, mid, nr);
+	tree[no] = tree[2*no] + tree[2*no+1];
 }
-ll seg_update(int l, int r, ll val, int n) { return seg_update(l, r, val, 1, 0, n); }
+void seg_update(int l, int r, ll val, int n) { seg_update(l, r, val, 1, 0, n); }
 
 vector<int> adj[MX];
 vector<int> parent, depth, heavy, head, pos;
 int pcnt;
+
+void add_edge(int u, int v){
+	adj[u].push_back(v);
+	adj[v].push_back(u);
+}
+
 
 int dfs(int v) {
 	int size = 1;
