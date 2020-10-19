@@ -37,12 +37,12 @@ ll extended_gcd(ll a, ll b, ll &retx, ll &rety) {
 	return oldr;
 }
 
-ll modinv(ll x, ll n) {
-	ll gcdv, s, t;
-	gcdv = extended_gcd(x, n, s, t);
+ll modinv(ll a, ll b) {
+	ll gcdv, x, y;
+	gcdv = extended_gcd(a, b, x, y);
 	if (gcdv != 1) return -1;
-	if (s < 0) s = ((s % n) + n) % n;
-	return s;
+	if (x < 0) x = ((x % b) + b) % b;
+	return x;
 }
 
 // gcd(n[i], n[j]) == 1
