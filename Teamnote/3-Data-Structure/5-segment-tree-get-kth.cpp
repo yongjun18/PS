@@ -10,6 +10,7 @@ ll update(int idx, ll val, int no, int nl, int nr) {
 ll update(int idx, ll val){ return update(idx, val, 1, 0, MX); }
 
 int get_kth(ll k, int no, int nl, int nr){
+	if(tree[no] < k) return -1;
 	if(nl+1 == nr) return nl;
 	int mid = (nl+nr)/2;
 	if(tree[2*no] >= k) return get_kth(k, 2*no, nl, mid);
