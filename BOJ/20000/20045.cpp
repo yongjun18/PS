@@ -6,19 +6,26 @@
 #include <set>
 using namespace std;
 typedef long long ll;
-const ll INF = 1e16;
+const int INF = 1e9;
 const int MOD = 1e9 + 7;
 
 struct Node {
 	Node *l, *r;
 	int val;
 };
-Node* new_node(){
-	return new Node();
-}
 
 const int MX = 250100;
 const int MAXN = 250100;
+const int MAX_DEPTH = 19;
+const int MAX_NODE = MAXN * 4 + MAX_DEPTH * MAXN;
+
+int cnt = 0;
+Node nodes[MAX_NODE];
+
+Node* new_node(){
+	return &nodes[cnt++];
+}
+
 Node* root[MAXN + 1];
 int rcnt;
 
@@ -28,12 +35,14 @@ Node* build(int nl, int nr) {
 		int mid = (nl + nr) / 2;
 		now->l = build(nl, mid);
 		now->r = build(mid, nr);
-		now->val = 0;
 	}
 	return now;
 }
 
 void init() {
+	for (int i = 0; i < cnt; i++)
+		nodes[i] = { NULL, NULL, 0 };
+	cnt = 0;
 	root[0] = build(0, MX);
 	rcnt = 1;
 }
@@ -64,14 +73,19 @@ int query(int l, int r, Node* no, int nl, int nr) {
 }
 int query(int k, int l, int r) { return query(l, r, root[k], 0, MX); }
 
-int get_mth_in_k(int m, Node* no, int nl, int nr){
-	if (no->val < m) return -1;
+int get_kth(int k, Node* pno, Node* no, int nl, int nr){
+	if (no->val - pno->val < k) return -1;
 	if (nl + 1 == nr) return nl;
 	int mid = (nl + nr) / 2;
-	if (no->l->val >= m) return get_mth_in_k(m, no->l, nl, mid);
-	else return get_mth_in_k(m - no->l->val, no->r, mid, nr);
+	int lsum = no->l->val - pno->l->val;
+	if (lsum >= k)
+		return get_kth(k, pno->l, no->l, nl, mid);
+	else return get_kth(k - lsum, pno->r, no->r, mid, nr);
+
 }
-int get_mth_in_k(int k, int m){ return get_mth_in_k(m, root[k], 0, MX); }
+int get_kth(int k, int s, int e){
+	return get_kth(k, root[s - 1], root[e], 0, MX);
+}
 
 
 ll arr[MX];
@@ -90,7 +104,7 @@ int getcx(ll x){
 }
 
 struct QNode{
-	int idx, mth;
+	int idx, kth;
 	ll val;
 	bool operator < (const QNode& rhs) const{
 		return val < rhs.val;
@@ -114,22 +128,23 @@ int main()
 		update(getcx(psum[i]), 1);
 	}
 	for (int i = 1; i <= n; i++){
-		int mth = get_mth_in_k(i, 1);
-		ll val = psum[i] - used[mth];
+		int kth = get_kth(1, 1, i);
+		ll val = psum[i] - used[kth];
 		pq.push({ i, 1, val });
 	}
 
 	for (int i = 0; i < k; i++){
 		QNode qn = pq.top(); pq.pop();
-		int mth;
+		int kth;
 		ll newv;
-		
+
 		printf("%lld ", qn.val);
-		
-		mth = get_mth_in_k(qn.idx, qn.mth + 1);
-		if (mth == -1) continue;
-		newv = psum[qn.idx] - used[mth];
-		pq.push({ qn.idx, qn.mth + 1, newv });
+
+		kth = get_kth(qn.kth + 1, 1, qn.idx);
+		if (kth == -1) continue;
+		newv = psum[qn.idx] - used[kth];
+		pq.push({ qn.idx, qn.kth + 1, newv });
 	}
+	printf("\n");
 	return 0;
 }
