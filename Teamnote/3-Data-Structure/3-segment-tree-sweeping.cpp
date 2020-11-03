@@ -1,52 +1,68 @@
 // 화성지도 
 // https://www.acmicpc.net/problem/3392
 
-const int MX = 30000;
-ll cnt[120100];
-// area[no] : 해당 노드 아래 켜져 있는 구간의 합집합 길이
-ll area[120100];
+#include <stdio.h>
+#include <memory.h>
+#include <stack>
+#include <queue>
+#include <algorithm>
+#include <vector>
+using namespace std;
+typedef long long ll;
+const int INF = 1e9;
+const int MOD = 1e9 + 7;
 
-void update(int l, int r, ll val, int no, int nl, int nr) {
-	if (r <= nl || nr <= l) return;
-	if (l <= nl && nr <= r) cnt[no] += val;
-	else {
-		int mid = (nl + nr) / 2;
-		update(l, r, val, 2 * no, nl, mid);
-		update(l, r, val, 2 * no + 1, mid, nr);
+const int MX = 40100;
+ll tree[MX * 4];
+ll cnt[MX * 4];
+
+ll update(int l, int r, ll val, int no, int nl, int nr){
+	if (r <= nl || nr <= l) return tree[no];
+	if (l <= nl && nr <= r){ 
+		cnt[no] += val;
+		if (cnt[no] > 0) return tree[no] = nr - nl;
+		if (nl + 1 < nr) return tree[no] = tree[2 * no] + tree[2 * no + 1];
+		return tree[no] = 0;
 	}
-	if (cnt[no] == 0) {
-		if (nl + 1 == nr) area[no] = 0;
-		else area[no] = area[no * 2] + area[no * 2 + 1];
-	}
-	else area[no] = nr - nl;
+	int mid = (nl + nr) / 2;
+	update(l, r, val, 2 * no, nl, mid);
+	update(l, r, val, 2 * no + 1, mid, nr);
+	
+	if (cnt[no] > 0) return tree[no];
+	else return tree[no] = tree[2 * no] + tree[2 * no + 1];
 }
-void update(int l, int r, ll val, int n) { update(l, r, val, 1, 0, n); }
+void update(int l, int r, ll val, int n){ update(l, r, val, 1, 0, n); }
 
-struct Range {
-	int x1, x2, y, v;
-	bool operator < (const Range& ot) const {
-		if (y != ot.y) return y < ot.y;
-		return x1 < ot.x1;
+struct Range{
+	int y, x1, x2, t;
+	bool operator < (const Range& rhs) const{
+		return y < rhs.y;
 	}
 };
+
 vector<Range> rg;
 
-int main()
+int main() 
 {
-	int n, x1, y1, x2, y2;
-	ll sum = 0;
+	int n;
+	ll ans;
+	
 	scanf("%d", &n);
-	for (int i = 0; i < n; i++) {
+	for (int i = 0; i < n; i++){
+		int x1, y1, x2, y2;
 		scanf("%d %d %d %d", &x1, &y1, &x2, &y2);
-		rg.push_back({ x1, x2, y1, 1 });
-		rg.push_back({ x1, x2, y2, -1 });
+		rg.push_back({ y1, x1, x2, 1 });
+		rg.push_back({ y2, x1, x2, -1 });
 	}
 	sort(rg.begin(), rg.end());
-	for (int i = 0; i < rg.size(); i++) {
-		if (i && rg[i].y != rg[i - 1].y)
-			sum += area[1] * (rg[i].y - rg[i - 1].y);
-		update(rg[i].x1, rg[i].x2, rg[i].v, MX);
+
+	ans = 0;
+	for (int i = 0; i < rg.size(); i++){
+		if (i > 0 && rg[i - 1].y != rg[i].y){
+			ans += tree[1] * (rg[i].y - rg[i - 1].y);
+		}
+		update(rg[i].x1, rg[i].x2, rg[i].t, MX);
 	}
-	printf("%lld\n", sum);
+	printf("%lld\n", ans);
 	return 0;
 }
