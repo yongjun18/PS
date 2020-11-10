@@ -67,7 +67,6 @@ int main()
 		for (int j = 0; j < n; j++){
 			if (milb[i] == 1 && milb[j] == 1 && visit[i][j] == 1){
 				ok = 1;
-				break;
 			}
 		}
 	}
