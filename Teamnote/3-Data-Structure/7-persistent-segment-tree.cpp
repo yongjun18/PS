@@ -12,7 +12,7 @@ const int MAXN = 100100;
 // MAX_DEPTH : 트리의 깊이
 const int MAX_DEPTH = 18;
 // 최대 필요한 노드의 개수
-const int MAX_NODE = MAXN * 4 + MAX_DEPTH * MAXN;
+const int MAX_NODE = MAXN * 2 + MAX_DEPTH * MAXN;
 
 int cnt = 0;
 Node nodes[MAX_NODE];
