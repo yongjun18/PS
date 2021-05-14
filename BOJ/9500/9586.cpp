@@ -15,10 +15,11 @@ const int INF = 1e9;
 const int MOD = 1e9 + 7;
 
 int arr[100100];
-int first0[100100][35];
-int pxor[100100];
 
-vector< pair<int, int> > vec;
+int pxor[100100];
+vector< pair<int, int> > xlist;
+
+int first0[100100][35];
 
 int main()
 {
@@ -26,46 +27,48 @@ int main()
 	ll ans;
 
 	scanf("%d", &n);
+
 	for (int i = 1; i <= n; i++){
 		scanf("%d", &arr[i]);
+		pxor[i] = (pxor[i - 1] ^ arr[i]);
+		xlist.push_back({ pxor[i], i });
 	}
+	xlist.push_back({ 0, 0 });
+	sort(xlist.begin(), xlist.end());
 
-	for (int b = 0; b <= 30; b++){
-		for (int i = 1; i <= n; i++){
-			first0[i][b] = max(first0[i - 1][b], i + 1);
-			while ((1 << b) & arr[first0[i][b]]){
-				first0[i][b]++;
+	for (int start = 1; start <= n; start++){
+		for (int i = 0; i <= 30; i++){
+			first0[start][i] = max(first0[start - 1][i], start);
+			while (arr[first0[start][i]] & (1 << i)){
+				first0[start][i]++;
 			}
 		}
 	}
 
-	for (int i = 1; i <= n; i++){
-		pxor[i] = (pxor[i - 1] ^ arr[i]);
-		vec.push_back({ pxor[i], i });
-	}
-	sort(vec.begin(), vec.end());
-
 	ans = 0;
-	for (int i = n; i >= 1; i--){
-		vector<int> chg;
+	for (int start = 1; start <= n; start++){
+		vector<int> vec;
 		int andv;
 
-		chg.push_back(i);
-		for (int b = 0; b <= 30; b++){
-			chg.push_back(first0[i][b]);
+		for (int i = 0; i <= 30; i++){
+			vec.push_back(first0[start][i]);
 		}
-		sort(chg.begin() + 1, chg.end());
-		chg.push_back(n + 1);
+		vec.push_back(start);
+		vec.push_back(n + 1);
+		sort(vec.begin(), vec.end());
 
-		andv = arr[i];
-		for (int j = 0; j + 1 < chg.size(); j++){
-			int x = chg[j];
-			int y = chg[j + 1];
-			int findv = andv ^ pxor[i - 1];
-			int cnt = lower_bound(vec.begin(), vec.end(), make_pair(findv, y))
-				- lower_bound(vec.begin(), vec.end(), make_pair(findv, x));
+		andv = (1 << 31) - 1;
+		for (int i = 0; i + 1 < vec.size(); i++){
+			int bg = vec[i];
+			int ed = vec[i + 1];
+			int xorv;
+			int cnt;
+
+			andv &= arr[bg];
+			xorv = (andv ^ pxor[start - 1]);
+			cnt = lower_bound(xlist.begin(), xlist.end(), make_pair(xorv, ed))
+				- lower_bound(xlist.begin(), xlist.end(), make_pair(xorv, bg));
 			ans += cnt;
-			andv &= arr[y];
 		}
 	}
 	printf("%lld\n", ans);
