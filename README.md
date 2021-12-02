@@ -1,6 +1,5 @@
 # PS
 Problem Solving
 
-BOJ : [yongjun18](https://www.acmicpc.net/user/yongjun18)
-
-Codeforces : [yongjun18](https://codeforces.com/profile/yongjun18)
+BOJ : <https://www.acmicpc.net/user/yongjun18>  
+Codeforces : <https://codeforces.com/profile/yongjun18>
