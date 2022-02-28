@@ -41,8 +41,8 @@ int simulated_annealing(int n) {
 	for (int i = 0; i < 300000; i++) {
 		// 랜덤한 다음 상태 만들기
 		int x = rand() % n + 1;
-		int y = rand() % n + 1;
-		if (x == y) y = y % n + 1;
+		int y = rand() % (n - 1) + 1;
+		if (y >= x) y = y % n + 1;
 		swap(pos[x], pos[y]);
 
 		// 새로운 상태 에너지 계산
