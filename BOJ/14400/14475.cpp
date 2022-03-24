@@ -14,13 +14,7 @@ typedef long long ll;
 const int INF = 1e9;
 const int MOD = 1e9 + 7;
 
-struct Edge { int next, w; };
-struct QNode {
-	int now, temp, tim, wsum;
-	bool operator <(const QNode& rhs) const { return wsum > rhs.wsum; }
-};
-
-vector<Edge> adj[10010];
+vector< pair<int, int> > adj[10010];
 int t[10010];
 
 void add_edge(int u, int v, int w) {
@@ -39,36 +33,35 @@ void dijkstra(int n, int x, int start) {
 		}
 	}
 	dist[start][0][0] = 0;
-	priority_queue<QNode> pq;
-	pq.push({ start, 0, 0, 0 });
+	priority_queue< tuple<int, int, int, int> > pq;
+	pq.push({ 0, start, 0, 0 });
 
 	while (pq.size()) {
-		int now = pq.top().now;
-		int temp = pq.top().temp;
-		int tim = pq.top().tim;
-		int wsum = pq.top().wsum;
+		int wsum, now, temp, tim;
+		tie(wsum, now, temp, tim) = pq.top();
+		wsum *= -1;
 		pq.pop();
 
 		if (dist[now][temp][tim] < wsum) continue;
 
-		for (Edge e : adj[now]) {
+		for (auto [nxt, w] : adj[now]) {
 			int next, next_temp, next_tim, next_wsum;
 
-			next = e.next;
+			next = nxt;
 
 			if (t[next] != 1) next_temp = t[next];
 			else next_temp = temp;
 
-			if (t[next] != 1 && temp != t[next] && tim + e.w < x) continue;
+			if (t[next] != 1 && temp != t[next] && tim + w < x) continue;
 
-			if (t[next] == 1) next_tim = min(x, tim + e.w);
+			if (t[next] == 1) next_tim = min(x, tim + w);
 			else next_tim = 0;
 
-			next_wsum = wsum + e.w;
+			next_wsum = wsum + w;
 
 			if (dist[next][next_temp][next_tim] > next_wsum) {
 				dist[next][next_temp][next_tim] = next_wsum;
-				pq.push({ next, next_temp, next_tim, next_wsum });
+				pq.push({ -next_wsum, next, next_temp, next_tim });
 			}
 		}
 	}
